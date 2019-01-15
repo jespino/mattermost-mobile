@@ -3,6 +3,8 @@ dist
 *.zip
 server.PID
 mattermost.keystore
+.flowinstall
+flow-typed
 
 # OSX
 #

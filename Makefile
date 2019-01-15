@@ -1,5 +1,5 @@
 .PHONY: pre-run pre-build clean
-.PHONY: check-style
+.PHONY: check-style flow
 .PHONY: start stop
 .PHONY: run run-ios run-android
 .PHONY: build build-ios build-android unsigned-ios unsigned-android
@@ -59,6 +59,18 @@ pre-build: | npm-ci .podinstall dist/assets ## Install dependencies and assets b
 check-style: node_modules ## Runs eslint
 	@echo Checking for style guide compliance
 	@npm run check
+
+flow: .flowinstall
+	@echo Checking types
+
+	npm run flow
+
+.flowinstall: node_modules
+	@echo Getting flow-typed packages
+
+	npm run flow-typed install
+
+	touch $@
 
 clean: ## Cleans dependencies, previous builds and temp files
 	@echo Cleaning started

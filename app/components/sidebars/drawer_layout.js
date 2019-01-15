@@ -64,9 +64,7 @@ export type DrawerMovementOptionType = {
     velocity?: number,
 };
 
-export default class DrawerLayout extends Component {
-    props: PropType;
-    state: StateType;
+export default class DrawerLayout extends Component<PropType, StateType> {
     _lastOpenValue: number;
     _panResponder: any;
     _isClosing: boolean;

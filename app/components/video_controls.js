@@ -3,9 +3,9 @@
 // Copyright (c) 2016-2017 Charles.
 // Modified work: Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
+// @flow
 
-import React, {PureComponent} from 'react';
-import PropTypes from 'prop-types';
+import * as React from 'react';
 import {
     ActivityIndicator,
     Animated,
@@ -29,27 +29,35 @@ export const PLAYER_STATE = {
     ENDED: 2,
 };
 
-export default class VideoControls extends PureComponent {
-    static propTypes = {
-        duration: PropTypes.number,
-        isLoading: PropTypes.bool,
-        isFullScreen: PropTypes.bool,
-        mainColor: PropTypes.string,
-        onFullScreen: PropTypes.func,
-        onPaused: PropTypes.func,
-        onReplay: PropTypes.func,
-        onSeek: PropTypes.func,
-        onSeeking: PropTypes.func,
-        playerState: PropTypes.number,
-        progress: PropTypes.number,
-    };
+type PlayerStateType = 0 | 1 | 2;
 
+type Props = {|
+        duration: number,
+        isLoading?: boolean,
+        isFullScreen?: boolean,
+        mainColor: string,
+        onFullScreen?: (Event) => null,
+        onPaused?: () => null,
+        onReplay?: () => null,
+        onSeek?: (number) => null,
+        onSeeking?: (boolean) => null,
+        playerState?: PlayerStateType,
+        progress?: number,
+|}
+
+type State = {|
+    opacity: Animated.Value,
+    isVisible: boolean,
+    isSeeking: boolean,
+|}
+
+export default class VideoControls extends React.PureComponent<Props, State> {
     static defaultProps = {
         duration: 0,
         mainColor: 'rgba(12, 83, 175, 0.9)',
     };
 
-    constructor(props) {
+    constructor(props: Props) {
         super(props);
         this.state = {
             opacity: new Animated.Value(1),
@@ -62,7 +70,7 @@ export default class VideoControls extends PureComponent {
         AppState.addEventListener('change', this.handleAppStateChange);
     }
 
-    componentWillReceiveProps(nextProps) {
+    componentWillReceiveProps(nextProps: Props) {
         if (nextProps.playerState === PLAYER_STATE.ENDED || nextProps.isLoading ||
             (nextProps.playerState === PLAYER_STATE.PAUSED && this.props.playerState === PLAYER_STATE.PLAYING)) {
             this.fadeInControls(false);
@@ -79,7 +87,7 @@ export default class VideoControls extends PureComponent {
         });
     };
 
-    fadeInControls = (loop = true) => {
+    fadeInControls = (loop: boolean = true) => {
         this.setState({isVisible: true});
         Animated.timing(this.state.opacity, {
             toValue: 1,
@@ -93,7 +101,7 @@ export default class VideoControls extends PureComponent {
         });
     };
 
-    fadeOutControls = (delay = 0) => {
+    fadeOutControls = (delay: number = 0) => {
         Animated.timing(this.state.opacity, {
             toValue: 0,
             duration: 250,
@@ -106,7 +114,7 @@ export default class VideoControls extends PureComponent {
         });
     };
 
-    getPlayerStateIcon = (playerState) => {
+    getPlayerStateIcon = (playerState: PlayerStateType) => {
         switch (playerState) {
         case PLAYER_STATE.PAUSED:
             return playImage;
@@ -119,15 +127,15 @@ export default class VideoControls extends PureComponent {
         return playImage;
     };
 
-    handleAppStateChange = (nextAppState) => {
+    handleAppStateChange = (nextAppState: string) => {
         if (nextAppState !== 'active' && this.props.playerState === PLAYER_STATE.PLAYING) {
             this.onPause();
         }
     };
 
-    humanizeVideoDuration = (seconds) => {
+    humanizeVideoDuration = (seconds: number) => {
         const [begin, end] = seconds >= 3600 ? [11, 8] : [14, 5];
-        const date = new Date(null);
+        const date = new Date();
         date.setSeconds(seconds);
         return date.toISOString().substr(begin, end);
     };
@@ -139,12 +147,16 @@ export default class VideoControls extends PureComponent {
         if (this.props.playerState === PLAYER_STATE.PAUSED) {
             this.fadeOutControls(250);
         }
-        this.props.onPaused();
+        if (this.props.onPaused) {
+            this.props.onPaused();
+        }
     };
 
     onReplay = () => {
         this.fadeOutControls(500);
-        this.props.onReplay();
+        if (this.props.onReplay) {
+            this.props.onReplay();
+        }
     };
 
     renderControls() {
@@ -160,7 +172,7 @@ export default class VideoControls extends PureComponent {
                     <View style={styles.progressColumnContainer}>
                         <View style={[styles.timerLabelsContainer]}>
                             <Text style={styles.timerLabel}>
-                                {this.humanizeVideoDuration(this.props.progress)}
+                                {this.humanizeVideoDuration(this.props.progress || 0)}
                             </Text>
                             <Text style={styles.timerLabel}>
                                 {this.humanizeVideoDuration(this.props.duration)}
@@ -172,7 +184,7 @@ export default class VideoControls extends PureComponent {
                             onValueChange={this.seekVideo}
                             onSlidingStart={this.seekVideoStart}
                             maximumValue={Math.floor(this.props.duration)}
-                            value={Math.floor(this.props.progress)}
+                            value={Math.floor(this.props.progress || 0)}
                             trackStyle={styles.track}
                             thumbStyle={[styles.thumb, {borderColor: this.props.mainColor}]}
                             minimumTrackTintColor={this.props.mainColor}
@@ -189,19 +201,23 @@ export default class VideoControls extends PureComponent {
         );
     }
 
-    seekVideo = (value) => {
+    seekVideo = (value: number) => {
         this.setState({isSeeking: true});
-        this.props.onSeek(value);
+        if (this.props.onSeek) {
+            this.props.onSeek(value);
+        }
     };
 
-    seekVideoEnd = (value) => {
+    seekVideoEnd = (value: number) => {
         this.setState({isSeeking: false});
         if (this.props.playerState === PLAYER_STATE.PLAYING) {
             this.toggleControls();
         }
-        this.props.onSeek(value);
-        if (this.props.onSeeking) {
-            this.props.onSeeking(true);
+        if (this.props.onSeek) {
+            this.props.onSeek(value);
+            if (this.props.onSeeking) {
+                this.props.onSeeking(true);
+            }
         }
     };
 
@@ -213,7 +229,10 @@ export default class VideoControls extends PureComponent {
         }
     };
 
-    setPlayerControls = (playerState) => {
+    setPlayerControls = (playerState: ?PlayerStateType): React.Node => {
+        if (!playerState) {
+            return null;
+        }
         const icon = this.getPlayerStateIcon(playerState);
         const pressAction = playerState === PLAYER_STATE.ENDED ? this.onReplay : this.onPause;
         return (

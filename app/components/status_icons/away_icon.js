@@ -1,20 +1,20 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
+// @flow
 
 import React, {PureComponent} from 'react';
-import PropTypes from 'prop-types';
 import {View} from 'react-native';
 import Svg, {
     Path,
 } from 'react-native-svg';
 
-export default class AwayIcon extends PureComponent {
-    static propTypes = {
-        width: PropTypes.number.isRequired,
-        height: PropTypes.number.isRequired,
-        color: PropTypes.string.isRequired,
-    };
+type Props = {|
+    width: number,
+    height: number,
+    color: string,
+|}
 
+export default class AwayIcon extends PureComponent<Props> {
     render() {
         const {color, height, width} = this.props;
 

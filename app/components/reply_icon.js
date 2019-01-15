@@ -1,19 +1,19 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
+// @flow
 
 import React, {PureComponent} from 'react';
-import PropTypes from 'prop-types';
 import Svg, {
     Path,
 } from 'react-native-svg';
 
-export default class ReplyIcon extends PureComponent {
-    static propTypes = {
-        width: PropTypes.number.isRequired,
-        height: PropTypes.number.isRequired,
-        color: PropTypes.string.isRequired,
-    };
+type Props = {|
+    width: number,
+    height: number,
+    color: string,
+|}
 
+export default class ReplyIcon extends PureComponent<Props> {
     render() {
         return (
             <Svg

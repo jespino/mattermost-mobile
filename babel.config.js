@@ -8,6 +8,7 @@ module.exports = {
         },
     },
     plugins: [
+        'flow-react-proptypes',
         '@babel/plugin-transform-runtime',
         ['module-resolver', {
             root: ['.'],

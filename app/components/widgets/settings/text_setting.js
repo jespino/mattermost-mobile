@@ -1,8 +1,8 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
+// @flow
 
-import React, {PureComponent} from 'react';
-import PropTypes from 'prop-types';
+import * as React from 'react';
 import {
     View,
     Text,
@@ -13,39 +13,25 @@ import {
 import FormattedText from 'app/components/formatted_text';
 import {changeOpacity, makeStyleSheetFromTheme} from 'app/utils/theme';
 
-export default class TextSetting extends PureComponent {
-    static propTypes = {
-        id: PropTypes.string.isRequired,
-        label: PropTypes.oneOfType([
-            PropTypes.shape({
-                id: PropTypes.string.isRequired,
-                defaultMessage: PropTypes.string.isRequired,
-            }),
-            PropTypes.string,
-        ]),
-        placeholder: PropTypes.string,
-        helpText: PropTypes.node,
-        errorText: PropTypes.node,
-        disabled: PropTypes.bool,
-        disabledText: PropTypes.string,
-        maxLength: PropTypes.number,
-        optional: PropTypes.bool,
-        theme: PropTypes.object.isRequired,
-        onChange: PropTypes.func.isRequired,
-        value: PropTypes.string.isRequired,
-        multiline: PropTypes.bool,
-        showRequiredAsterisk: PropTypes.bool,
-        keyboardType: PropTypes.oneOf([
-            'default',
-            'number-pad',
-            'decimal-pad',
-            'numeric',
-            'email-address',
-            'phone-pad',
-            'url',
-        ]),
-    };
+type Props = {|
+    id: string,
+    label?: {|id: string, defaultMessage: string|} | string,
+    placeholder?: string,
+    helpText?: React.Node,
+    errorText?: React.Node,
+    disabled?: boolean,
+    disabledText?: string,
+    maxLength?: number,
+    optional?: boolean,
+    theme: Object,
+    onChange: (id: string, value: string | number) => null,
+    value: string,
+    multiline?: boolean,
+    showRequiredAsterisk?: boolean,
+    keyboardType: 'default' | 'number-pad' | 'decimal-pad' | 'numeric' | 'email-address' | 'phone-pad' | 'url',
+|}
 
+export default class TextSetting extends React.PureComponent<Props> {
     static defaultProps = {
         optional: false,
         disabled: false,
@@ -54,7 +40,7 @@ export default class TextSetting extends PureComponent {
         keyboardType: 'default',
     };
 
-    onChangeText = (value) => {
+    onChangeText = (value: string | number) => {
         const {id, onChange} = this.props;
         onChange(id, value);
     };
@@ -76,7 +62,7 @@ export default class TextSetting extends PureComponent {
         const style = getStyleSheet(theme);
 
         let labelContent = label;
-        if (label && label.defaultMessage) {
+        if (label && label.id && label.defaultMessage) {
             labelContent = (
                 <FormattedText
                     style={style.title}
